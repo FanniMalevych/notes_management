@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 import crud
 import schemas
+from analytics import analyze_notes
 from db import models
 from db.engine import SessionLocal
 from ai_summarize import summarize_note_with_gemini
@@ -67,3 +68,12 @@ def summarize_note(note_id: int, db: Session = Depends(get_db)):
 
     summary = summarize_note_with_gemini(note.content)
     return {"note_id": note_id, "summary": summary}
+
+@app.get("/analytics/")
+def get_notes_analytics(db: Session = Depends(get_db)):
+    notes = db.query(models.Note).all()
+
+    if notes is None:
+        raise HTTPException(status_code=404, detail="Notes not found")
+
+    return analyze_notes(notes)
