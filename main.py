@@ -4,7 +4,9 @@ from sqlalchemy.orm import Session
 
 import crud
 import schemas
+from db import models
 from db.engine import SessionLocal
+from ai_summarize import summarize_note_with_gemini
 
 app = FastAPI()
 
@@ -55,3 +57,13 @@ def update_note(note_id: int, note: schemas.NoteUpdate, db: Session = Depends(ge
 @app.delete("/notes/{note_id}/")
 def delete_note(note_id: int, db: Session = Depends(get_db)):
     return crud.delete_note(note_id=note_id, db=db)
+
+
+@app.post("/notes/summarize/{note_id}")
+def summarize_note(note_id: int, db: Session = Depends(get_db)):
+    note = db.query(models.Note).filter(models.Note.id == note_id).first()
+    if note is None:
+        raise HTTPException(status_code=404, detail="Note not found")
+
+    summary = summarize_note_with_gemini(note.content)
+    return {"note_id": note_id, "summary": summary}
