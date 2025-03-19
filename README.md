@@ -19,10 +19,14 @@ This project is a Notes Management System built using FastAPI, SQLAlchemy, and i
 
  `git clone https://github.com/FanniMalevych/notes_management`
 
-### create virtual environment, install dependencies, run migrations (do not forget about .env)
+### to run locally create virtual environment, install dependencies, run migrations (do not forget update .env)
 
 `python -m venv venv`
 `venv\Scripts\activate (on Windows)`
 `source venv/bin/activate (on macOS)`
 `pip install -r requirements.txt`
 `alembic upgrade head`
+
+### to run in docker container (do not forget update .env)
+
+`docker-compose up --build`
