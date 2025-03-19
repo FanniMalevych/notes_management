@@ -32,12 +32,12 @@ def read_notes(db: Session = Depends(get_db)):
 
 @app.get("/notes/{note_id}/", response_model=schemas.Note)
 def read_single_note(note_id: int, db: Session = Depends(get_db)):
-    db_note = crud.get_note(db=db, note_id=note_id)
+    note = crud.get_note(db=db, note_id=note_id)
 
-    if db_note is None:
+    if note is None:
         raise HTTPException(status_code=404, detail="Note not found")
 
-    return db_note
+    return note
 
 
 @app.post("/notes/", response_model=schemas.Note)
@@ -47,16 +47,20 @@ def create_note(note: schemas.NoteCreate, db: Session = Depends(get_db)):
 
 @app.put("/notes/{note_id}/", response_model=schemas.Note)
 def update_note(note_id: int, note: schemas.NoteUpdate, db: Session = Depends(get_db)):
-    db_note = crud.update_note(db=db, note_id=note_id, note=note)
+    note = crud.update_note(db=db, note_id=note_id, note=note)
 
-    if db_note is None:
+    if note is None:
         raise HTTPException(status_code=404, detail="Note not found")
 
-    return db_note
+    return note
 
 
 @app.delete("/notes/{note_id}/")
 def delete_note(note_id: int, db: Session = Depends(get_db)):
+    note = crud.get_note(db=db, note_id=note_id)
+    if note is None:
+        raise HTTPException(status_code=404, detail="Note not found")
+
     return crud.delete_note(note_id=note_id, db=db)
 
 
@@ -71,9 +75,9 @@ def summarize_note(note_id: int, db: Session = Depends(get_db)):
 
 @app.get("/analytics/")
 def get_notes_analytics(db: Session = Depends(get_db)):
-    notes = db.query(models.Note).all()
+    notes = crud.get_all_notes(db=db)
 
-    if notes is None:
+    if not notes:
         raise HTTPException(status_code=404, detail="Notes not found")
 
     return analyze_notes(notes)
